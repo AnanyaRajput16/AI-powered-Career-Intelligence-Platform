@@ -3,7 +3,7 @@ import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const ResumeParser = () => {
-  const { updateProfile } = useAuth();
+  const { user, refreshUser, updateProfile } = useAuth();
   
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -28,16 +28,13 @@ const ResumeParser = () => {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    setError('');
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       validateAndSetFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleFileSelect = (e) => {
-    setError('');
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files && e.target.files.length > 0) {
       validateAndSetFile(e.target.files[0]);
     }
   };
@@ -49,6 +46,10 @@ const ResumeParser = () => {
   };
 
   const validateAndSetFile = (selectedFile) => {
+    setError('');
+    setMessage('');
+    setParsedData(null);
+    
     const validExtensions = ['pdf', 'docx'];
     const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
     
@@ -59,7 +60,7 @@ const ResumeParser = () => {
     }
     
     if (selectedFile.size > 5 * 1024 * 1024) {
-      setError('File is too large. Max size is 5MB.');
+      setError('File size exceeds 5MB limit.');
       setFile(null);
       return;
     }
@@ -77,7 +78,10 @@ const ResumeParser = () => {
   };
 
   const handleParse = async () => {
-    if (!file) return;
+    if (!file) {
+      setError('Please select a resume file first.');
+      return;
+    }
     
     setIsParsing(true);
     setError('');
@@ -87,6 +91,7 @@ const ResumeParser = () => {
       const base64Data = await convertToBase64(file);
       
       const payload = {
+        fileName: file.name,
         fileType: file.type || file.name.split('.').pop().toLowerCase(),
         fileData: base64Data
       };
@@ -94,6 +99,7 @@ const ResumeParser = () => {
       const response = await api.post('/api/resume/parse', payload);
       setParsedData(response.data.data);
       setMessage('Resume parsed successfully! Please review and edit the extracted details before saving to your profile.');
+      if (refreshUser) await refreshUser();
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Error parsing resume. Ensure you have installed pdf-parse and mammoth in the backend.');
@@ -322,6 +328,29 @@ const ResumeParser = () => {
           </div>
         )}
       </div>
+
+      {user && user.resumeParsingHistory && user.resumeParsingHistory.length > 0 && !parsedData && (
+        <div style={{ marginTop: '3rem', animation: 'fadeIn 0.5s ease-in-out' }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--text-primary)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Your Parsing History</h3>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {user.resumeParsingHistory.map((history, idx) => (
+              <div key={idx} className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--accent-blue)' }}>{history.fileName}</h4>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Parsed on: {new Date(history.parsedAt).toLocaleString()}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button onClick={() => setParsedData(history.parsedData)} className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}>
+                    View / Edit Data
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

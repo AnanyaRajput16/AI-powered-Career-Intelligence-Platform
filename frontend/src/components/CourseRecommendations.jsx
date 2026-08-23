@@ -51,7 +51,7 @@ const getFallbackCourses = (skill) => [
 ];
 
 const CourseRecommendations = () => {
-  const { user, token } = useAuth();
+  const { user, token, refreshUser } = useAuth();
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,6 +62,28 @@ const CourseRecommendations = () => {
   // Filters
   const [platformFilter, setPlatformFilter] = useState('All');
   const [difficultyFilter, setDifficultyFilter] = useState('All');
+
+  useEffect(() => {
+    if (user && user.analysisHistory && user.analysisHistory.courseRecommendations) {
+      const history = user.analysisHistory.courseRecommendations;
+      if (history.jobDescription) setJobDescription(history.jobDescription);
+      if (history.result) {
+        setAtsResult(history.result);
+        const missingSkills = history.result.missingSkills || [];
+        const recommendedCourses = [];
+        missingSkills.forEach(skill => {
+          const norm = skill.toLowerCase();
+          if (courseDB[norm]) {
+            courseDB[norm].forEach(c => recommendedCourses.push({ ...c, targetSkill: skill }));
+          } else {
+            getFallbackCourses(norm).forEach(c => recommendedCourses.push({ ...c, targetSkill: skill }));
+          }
+        });
+        setCourses(recommendedCourses);
+        setAnalyzed(true);
+      }
+    }
+  }, [user]);
 
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
@@ -75,10 +97,10 @@ const CourseRecommendations = () => {
     
     try {
       // Reuse the ATS API to get accurate missing skills
-      const response = await api.post('/api/ats/analyze', { jobDescription }, {
+      const response = await api.post('/api/ats/analyze', { jobDescription, module: 'courseRecommendations' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      localStorage.setItem('latestAtsResult', JSON.stringify(response.data));
+      if (refreshUser) refreshUser();
       const missingSkills = response.data.missingSkills || [];
       
       let generatedCourses = [];

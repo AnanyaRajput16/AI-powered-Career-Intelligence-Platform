@@ -177,6 +177,17 @@ const analyzeResume = async (req, res) => {
       user.analytics = user.analytics || {};
       user.analytics.atsScore = finalScore;
       user.analytics.atsCount = (user.analytics.atsCount || 0) + 1;
+
+      // Persist module specific data
+      const { module } = req.body;
+      if (module && user.analysisHistory && user.analysisHistory[module]) {
+        user.analysisHistory[module] = {
+          jobDescription,
+          result,
+          updatedAt: new Date()
+        };
+      }
+
       await user.save();
     } catch (saveErr) {
       console.error('Failed to save ATS analytics:', saveErr.message);

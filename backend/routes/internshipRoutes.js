@@ -6,15 +6,21 @@ const {
   getUserApplications,
   saveOrApplyInternship,
   updateApplication,
-  getInternshipStats
+  getInternshipStats,
+  createInternship,
+  updateInternship,
+  deleteInternship
 } = require('../controllers/internshipController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, isAdmin } = require('../middleware/authMiddleware');
 
 // Routes
-router.route('/').get(protect, getInternships);
+router.route('/').get(protect, getInternships).post(protect, isAdmin, createInternship);
 router.route('/applications/me').get(protect, getUserApplications);
 router.route('/stats/me').get(protect, getInternshipStats);
-router.route('/:id').get(protect, getInternshipById);
+router.route('/:id')
+  .get(protect, getInternshipById)
+  .put(protect, isAdmin, updateInternship)
+  .delete(protect, isAdmin, deleteInternship);
 router.route('/:id/apply').post(protect, saveOrApplyInternship);
 router.route('/applications/:id').put(protect, updateApplication);
 

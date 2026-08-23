@@ -158,6 +158,24 @@ router.post('/parse', protect, async (req, res) => {
     } catch (err) {
       console.error('Activity Log Error:', err.message);
     }
+    
+    try {
+      const User = require('../models/User');
+      const user = await User.findById(req.user._id);
+      if (user) {
+        user.resumeParsingHistory.unshift({
+          fileName: req.body.fileName || 'Uploaded Resume',
+          parsedAt: new Date(),
+          parsedData: parsedData
+        });
+        if (user.resumeParsingHistory.length > 10) {
+          user.resumeParsingHistory.pop();
+        }
+        await user.save();
+      }
+    } catch (err) {
+      console.error('History Save Error:', err.message);
+    }
 
     res.json({ message: 'Resume parsed successfully', data: parsedData });
   } catch (error) {

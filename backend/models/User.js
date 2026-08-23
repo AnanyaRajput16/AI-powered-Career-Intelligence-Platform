@@ -55,6 +55,33 @@ const UserSchema = new mongoose.Schema({
     jobRecCount: { type: Number, default: 0 },
     courseRecCount: { type: Number, default: 0 }
   },
+  analysisHistory: {
+    ats: {
+      jobDescription: { type: String, default: '' },
+      result: { type: Object, default: null },
+      updatedAt: { type: Date, default: null }
+    },
+    skillGap: {
+      jobDescription: { type: String, default: '' },
+      result: { type: Object, default: null },
+      updatedAt: { type: Date, default: null }
+    },
+    courseRecommendations: {
+      jobDescription: { type: String, default: '' },
+      result: { type: Object, default: null },
+      updatedAt: { type: Date, default: null }
+    },
+    resumeImprovements: {
+      jobDescription: { type: String, default: '' },
+      result: { type: Object, default: null },
+      updatedAt: { type: Date, default: null }
+    }
+  },
+  resumeParsingHistory: [{
+    fileName: { type: String },
+    parsedAt: { type: Date, default: Date.now },
+    parsedData: { type: Object }
+  }],
   createdAt: {
     type: Date,
     default: Date.now

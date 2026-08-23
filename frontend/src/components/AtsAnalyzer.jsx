@@ -3,11 +3,18 @@ import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const AtsAnalyzer = () => {
-  const { user, token } = useAuth();
+  const { user, token, refreshUser } = useAuth();
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (user && user.analysisHistory && user.analysisHistory.ats) {
+      if (user.analysisHistory.ats.jobDescription) setJobDescription(user.analysisHistory.ats.jobDescription);
+      if (user.analysisHistory.ats.result) setResult(user.analysisHistory.ats.result);
+    }
+  }, [user]);
 
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
@@ -19,11 +26,11 @@ const AtsAnalyzer = () => {
     setError('');
     
     try {
-      const response = await api.post('/api/ats/analyze', { jobDescription }, {
+      const response = await api.post('/api/ats/analyze', { jobDescription, module: 'ats' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setResult(response.data);
-      localStorage.setItem('latestAtsResult', JSON.stringify(response.data));
+      if (refreshUser) await refreshUser();
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Error analyzing resume against job description.');

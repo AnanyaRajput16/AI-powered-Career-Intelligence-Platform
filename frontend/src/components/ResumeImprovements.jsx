@@ -3,11 +3,22 @@ import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const ResumeImprovements = () => {
-  const { user } = useAuth();
+  const { user, token, refreshUser } = useAuth();
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [suggestions, setSuggestions] = useState(null);
+
+  useEffect(() => {
+    if (user && user.analysisHistory && user.analysisHistory.resumeImprovements) {
+      const history = user.analysisHistory.resumeImprovements;
+      if (history.jobDescription) setJobDescription(history.jobDescription);
+      if (history.result) {
+        const analysisData = analyzeResumeHeuristics(history.result);
+        setSuggestions(analysisData);
+      }
+    }
+  }, [user]);
 
   const analyzeResumeHeuristics = (atsResult) => {
     let score = 100;
@@ -127,7 +138,10 @@ const ResumeImprovements = () => {
     
     try {
       // Reuse ATS analysis logic to base suggestions upon
-      const response = await api.post('/api/ats/analyze', { jobDescription });
+      const response = await api.post('/api/ats/analyze', { jobDescription, module: 'resumeImprovements' }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (refreshUser) await refreshUser();
       const analysisData = analyzeResumeHeuristics(response.data);
       setSuggestions(analysisData);
     } catch (err) {

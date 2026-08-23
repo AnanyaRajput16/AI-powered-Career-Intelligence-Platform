@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const SkillGapAnalyzer = () => {
-  const { user, token } = useAuth();
+  const { user, token, refreshUser } = useAuth();
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (user && user.analysisHistory && user.analysisHistory.skillGap) {
+      if (user.analysisHistory.skillGap.jobDescription) setJobDescription(user.analysisHistory.skillGap.jobDescription);
+      if (user.analysisHistory.skillGap.result) setResult(user.analysisHistory.skillGap.result);
+    }
+  }, [user]);
 
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
@@ -20,11 +27,11 @@ const SkillGapAnalyzer = () => {
     
     try {
       // Reusing the exact same backend API as ATS Analysis
-      const response = await api.post('/api/ats/analyze', { jobDescription }, {
+      const response = await api.post('/api/ats/analyze', { jobDescription, module: 'skillGap' }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setResult(response.data);
-      localStorage.setItem('latestAtsResult', JSON.stringify(response.data));
+      if (refreshUser) await refreshUser();
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Error analyzing skill gap against job description.');

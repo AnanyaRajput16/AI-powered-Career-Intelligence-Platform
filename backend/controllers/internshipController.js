@@ -131,3 +131,41 @@ exports.getInternshipStats = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+// @desc    Create an internship
+// @route   POST /api/internships
+// @access  Private/Admin
+exports.createInternship = async (req, res) => {
+  try {
+    const internship = await Internship.create(req.body);
+    res.status(201).json(internship);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// @desc    Update an internship
+// @route   PUT /api/internships/:id
+// @access  Private/Admin
+exports.updateInternship = async (req, res) => {
+  try {
+    const internship = await Internship.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!internship) return res.status(404).json({ message: "Internship not found" });
+    res.json(internship);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// @desc    Delete an internship
+// @route   DELETE /api/internships/:id
+// @access  Private/Admin
+exports.deleteInternship = async (req, res) => {
+  try {
+    const internship = await Internship.findByIdAndDelete(req.params.id);
+    if (!internship) return res.status(404).json({ message: "Internship not found" });
+    res.json({ message: "Internship removed" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
