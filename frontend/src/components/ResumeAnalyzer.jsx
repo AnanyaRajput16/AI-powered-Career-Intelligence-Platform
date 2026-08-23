@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const ResumeAnalyzer = () => {
   const { user } = useAuth();
   const [file, setFile] = useState(null);
@@ -100,7 +102,7 @@ const ResumeAnalyzer = () => {
         fileData: base64Data
       };
 
-      const response = await axios.post('/api/users/resume', payload);
+      const response = await axios.post(`${API_URL}/api/users/resume`, payload);
       
       // Update local storage user with resume info
       const updatedUser = { ...user, resume: response.data.resume };
@@ -126,7 +128,7 @@ const ResumeAnalyzer = () => {
     if (!window.confirm("Are you sure you want to delete your uploaded resume?")) return;
     
     try {
-      await axios.delete('/api/users/resume');
+      await axios.delete(`${API_URL}/api/users/resume`);
       
       // Update local storage user
       const updatedUser = { ...user };
