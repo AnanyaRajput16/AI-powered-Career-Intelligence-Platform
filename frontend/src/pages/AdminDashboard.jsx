@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -54,13 +54,13 @@ const AdminDashboard = () => {
       if (user?.role === 'admin') {
         try {
           const [statsRes, usersRes, jobsRes, feedbackRes, analyticsRes, activityRes, healthRes] = await Promise.all([
-            axios.get('/api/admin/stats'),
-            axios.get('/api/admin/users'),
-            axios.get('/api/jobs'),
-            axios.get('/api/feedback'),
-            axios.get('/api/admin/analytics'),
-            axios.get('/api/admin/activity'),
-            axios.get('/api/health').catch(() => ({ data: { status: 'offline', timestamp: new Date() } }))
+            api.get('/api/admin/stats'),
+            api.get('/api/admin/users'),
+            api.get('/api/jobs'),
+            api.get('/api/feedback'),
+            api.get('/api/admin/analytics'),
+            api.get('/api/admin/activity'),
+            api.get('/api/health').catch(() => ({ data: { status: 'offline', timestamp: new Date() } }))
           ]);
           setStats(statsRes.data);
           setUsers(usersRes.data);
@@ -83,7 +83,7 @@ const AdminDashboard = () => {
 
   const refreshJobs = async () => {
     try {
-      const res = await axios.get('/api/jobs');
+      const res = await api.get('/api/jobs');
       setJobs(res.data);
     } catch (err) {
       console.error(err);
@@ -121,9 +121,9 @@ const AdminDashboard = () => {
       };
 
       if (editingJob) {
-        await axios.put(`/api/jobs/${editingJob._id}`, payload);
+        await api.put(`/api/jobs/${editingJob._id}`, payload);
       } else {
-        await axios.post('/api/jobs', payload);
+        await api.post('/api/jobs', payload);
       }
       setJobModalOpen(false);
       refreshJobs();
@@ -135,7 +135,7 @@ const AdminDashboard = () => {
   const handleDeleteJob = async (id) => {
     if (window.confirm('Are you sure you want to delete this job?')) {
       try {
-        await axios.delete(`/api/jobs/${id}`);
+        await api.delete(`/api/jobs/${id}`);
         refreshJobs();
       } catch (err) {
         alert(err.response?.data?.message || 'Error deleting job');

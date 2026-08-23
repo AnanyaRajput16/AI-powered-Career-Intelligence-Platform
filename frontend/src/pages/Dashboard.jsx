@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import ResumeAnalyzer from '../components/ResumeAnalyzer';
@@ -29,7 +29,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      axios.get('/api/notifications')
+      api.get('/api/notifications')
         .then(res => setNotifications(res.data))
         .catch(err => console.error('Error fetching notifications:', err));
     }
@@ -37,7 +37,7 @@ const Dashboard = () => {
 
   const handleMarkAsRead = async (id) => {
     try {
-      await axios.put(`/api/notifications/${id}/read`);
+      await api.put(`/api/notifications/${id}/read`);
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (err) {
       console.error(err);
@@ -46,7 +46,7 @@ const Dashboard = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await axios.put('/api/notifications/read-all');
+      await api.put('/api/notifications/read-all');
       setNotifications(notifications.map(n => ({ ...n, isRead: true })));
     } catch (err) {
       console.error(err);

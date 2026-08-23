@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 
-const API_URL = import.meta.env.VITE_API_URL;
+
 
 const AuthContext = createContext(null);
 
@@ -13,10 +13,9 @@ export const AuthProvider = ({ children }) => {
 
   // Set default authorization header if token exists
   if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    
   } else {
-    delete axios.defaults.headers.common['Authorization'];
-  }
+      }
 
   // Load user data on startup if token exists
   useEffect(() => {
@@ -24,10 +23,10 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           // Store token in axios headers
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          
           
           // Fetch full profile from server to ensure fresh data
-          const response = await axios.get(`${API_URL}/api/users/profile`);
+          const response = await api.get(`/api/users/profile`);
           const fullUser = response.data;
           
           localStorage.setItem('user', JSON.stringify(fullUser));
@@ -53,16 +52,16 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setError(null);
     try {
-      const response = await axios.post(`${API_URL}/api/users/login`, { email, password });
+      const response = await api.post(`/api/users/login`, { email, password });
       
       const { token: receivedToken } = response.data;
       
       localStorage.setItem('token', receivedToken);
       setToken(receivedToken);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${receivedToken}`;
+      
       
       // Fetch the full authenticated user profile immediately
-      const profileRes = await axios.get(`${API_URL}/api/users/profile`);
+      const profileRes = await api.get(`/api/users/profile`);
       const fullUser = profileRes.data;
       
       localStorage.setItem('user', JSON.stringify(fullUser));
@@ -80,7 +79,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     setError(null);
     try {
-      const response = await axios.post(`${API_URL}/api/users/register`, { name, email, password });
+      const response = await api.post(`/api/users/register`, { name, email, password });
       
       return { success: true, data: response.data };
     } catch (err) {
@@ -94,7 +93,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     setError(null);
     try {
-      const response = await axios.put(`${API_URL}/api/users/profile`, profileData);
+      const response = await api.put(`/api/users/profile`, profileData);
       const updatedUser = response.data;
       
       setUser(updatedUser);

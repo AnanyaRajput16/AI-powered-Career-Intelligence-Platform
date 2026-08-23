@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const SkillGapAnalyzer = () => {
@@ -20,7 +20,7 @@ const SkillGapAnalyzer = () => {
     
     try {
       // Reusing the exact same backend API as ATS Analysis
-      const response = await axios.post('/api/ats/analyze', { jobDescription }, {
+      const response = await api.post('/api/ats/analyze', { jobDescription }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setResult(response.data);

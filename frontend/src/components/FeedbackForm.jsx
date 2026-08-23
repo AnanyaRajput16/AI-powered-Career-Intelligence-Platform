@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 
 const FeedbackForm = () => {
   const [subject, setSubject] = useState('');
@@ -12,7 +12,7 @@ const FeedbackForm = () => {
     setLoading(true);
     setStatus(null);
     try {
-      await axios.post('/api/feedback', { subject, message });
+      await api.post('/api/feedback', { subject, message });
       setStatus({ type: 'success', text: 'Thank you for your feedback!' });
       setSubject('');
       setMessage('');

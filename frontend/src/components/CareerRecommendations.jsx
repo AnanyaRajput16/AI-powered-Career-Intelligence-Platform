@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../api/index';
 
 const rolesDB = [
   {
@@ -137,7 +137,7 @@ const CareerRecommendations = () => {
       
       // Fire-and-forget telemetry
       try {
-        axios.post('/api/users/analytics/track', { type: 'career' }, {
+        api.post('/api/users/analytics/track', { type: 'career' }, {
           headers: { Authorization: `Bearer ${user.token}` }
         }).catch(() => {}); // silently ignore errors to prevent UI breakage
       } catch (err) {}

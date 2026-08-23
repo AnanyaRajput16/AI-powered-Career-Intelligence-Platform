@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const ResumeParser = () => {
@@ -91,7 +91,7 @@ const ResumeParser = () => {
         fileData: base64Data
       };
 
-      const response = await axios.post('/api/resume/parse', payload);
+      const response = await api.post('/api/resume/parse', payload);
       setParsedData(response.data.data);
       setMessage('Resume parsed successfully! Please review and edit the extracted details before saving to your profile.');
     } catch (err) {

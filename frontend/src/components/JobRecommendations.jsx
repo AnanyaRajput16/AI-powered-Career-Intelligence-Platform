@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const JobRecommendations = () => {
@@ -14,7 +14,7 @@ const JobRecommendations = () => {
         setLoading(true);
         setError(null);
         try {
-          const res = await axios.get('/api/jobs');
+          const res = await api.get('/api/jobs');
           const fetchedJobs = res.data;
           
           if (!fetchedJobs || fetchedJobs.length === 0) {
@@ -63,7 +63,7 @@ const JobRecommendations = () => {
           
           // Fire-and-forget telemetry
           try {
-            axios.post('/api/users/analytics/track', { type: 'job' }, {
+            api.post('/api/users/analytics/track', { type: 'job' }, {
               headers: { Authorization: `Bearer ${user.token}` }
             }).catch(() => {});
           } catch (err) {}

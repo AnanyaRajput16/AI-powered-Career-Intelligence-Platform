@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const Internships = () => {
@@ -29,7 +29,7 @@ const Internships = () => {
   const fetchInternships = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/internships', {
+      const res = await api.get('/api/internships', {
         params: { search, paid: paidFilter, type: typeFilter, location: locationFilter }
       });
       setInternships(res.data);
@@ -43,9 +43,9 @@ const Internships = () => {
   const fetchMyApplications = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/internships/applications/me');
+      const res = await api.get('/api/internships/applications/me');
       setMyApplications(res.data);
-      const statRes = await axios.get('/api/internships/stats/me');
+      const statRes = await api.get('/api/internships/stats/me');
       setStats(statRes.data);
     } catch (err) {
       setError('Failed to load applications');
@@ -64,7 +64,7 @@ const Internships = () => {
 
   const handleApplyOrSave = async (internshipId, status, externalLink) => {
     try {
-      await axios.post(`/api/internships/${internshipId}/apply`, {
+      await api.post(`/api/internships/${internshipId}/apply`, {
         status: status,
         appliedDate: status === 'Applied' ? new Date() : null
       });
@@ -91,7 +91,7 @@ const Internships = () => {
 
   const updateApplicationNote = async (appId, notes, newStatus) => {
     try {
-      await axios.put(`/api/internships/applications/${appId}`, {
+      await api.put(`/api/internships/applications/${appId}`, {
         notes, status: newStatus
       });
       fetchMyApplications();

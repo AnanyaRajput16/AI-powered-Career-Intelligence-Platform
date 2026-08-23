@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = import.meta.env.VITE_API_URL;
+
 
 const ResumeAnalyzer = () => {
   const { user } = useAuth();
@@ -102,7 +102,7 @@ const ResumeAnalyzer = () => {
         fileData: base64Data
       };
 
-      const response = await axios.post(`${API_URL}/api/users/resume`, payload);
+      const response = await api.post(`/api/users/resume`, payload);
       
       // Update local storage user with resume info
       const updatedUser = { ...user, resume: response.data.resume };
@@ -128,7 +128,7 @@ const ResumeAnalyzer = () => {
     if (!window.confirm("Are you sure you want to delete your uploaded resume?")) return;
     
     try {
-      await axios.delete(`${API_URL}/api/users/resume`);
+      await api.delete(`/api/users/resume`);
       
       // Update local storage user
       const updatedUser = { ...user };
@@ -155,7 +155,7 @@ const ResumeAnalyzer = () => {
   const handleDownload = async () => {
     try {
       setMessage('Fetching file...');
-      const response = await axios.get(`${API_URL}/api/users/resume/download`);
+      const response = await api.get(`/api/users/resume/download`);
       const { fileName, fileData } = response.data;
       downloadBase64File(fileData, fileName);
       setMessage('');
@@ -174,13 +174,13 @@ const ResumeAnalyzer = () => {
 
     try {
       setMessage('Fetching file for view...');
-      const response = await axios.get(`${API_URL}/api/users/resume/download`);
+      const response = await api.get(`/api/users/resume/download`);
 
       const { fileData, fileType, fileName } = response.data;
 
       if (fileType === 'application/pdf' || fileType === 'pdf' || (fileName && fileName.toLowerCase().endsWith('.pdf'))) {
-        // Extract raw base64 from Data URL
-        const base64String = fileData.includes(',') ? fileData.split(',')[1] : fileData;
+        // Extract raw base64 from Data URL and clean whitespace
+        const base64String = (fileData.includes(',') ? fileData.split(',')[1] : fileData).replace(/\s+/g, '');
         
         // Decode base64 to binary
         const byteCharacters = atob(base64String);
@@ -199,9 +199,9 @@ const ResumeAnalyzer = () => {
         } else {
           window.open(fileURL, '_blank');
         }
-      } else if (fileName && fileName.toLowerCase().endsWith('.docx')) {
+      } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || fileType === 'docx' || (fileName && fileName.toLowerCase().endsWith('.docx'))) {
         // Render DOCX natively using docx-preview CDN injected into an HTML Blob
-        const base64String = fileData.includes(',') ? fileData.split(',')[1] : fileData;
+        const base64String = (fileData.includes(',') ? fileData.split(',')[1] : fileData).replace(/\s+/g, '');
         
         const htmlContent = `
 <!DOCTYPE html>

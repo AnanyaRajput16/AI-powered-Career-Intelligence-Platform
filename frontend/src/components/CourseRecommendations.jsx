@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const courseDB = {
@@ -75,7 +75,7 @@ const CourseRecommendations = () => {
     
     try {
       // Reuse the ATS API to get accurate missing skills
-      const response = await axios.post('/api/ats/analyze', { jobDescription }, {
+      const response = await api.post('/api/ats/analyze', { jobDescription }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       localStorage.setItem('latestAtsResult', JSON.stringify(response.data));
@@ -107,7 +107,7 @@ const CourseRecommendations = () => {
       
       // Fire-and-forget telemetry
       try {
-        axios.post('/api/users/analytics/track', { type: 'course' }, {
+        api.post('/api/users/analytics/track', { type: 'course' }, {
           headers: { Authorization: `Bearer ${token}` }
         }).catch(() => {});
       } catch (err) {}

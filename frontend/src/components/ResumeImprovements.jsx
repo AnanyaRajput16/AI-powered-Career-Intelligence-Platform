@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/index';
 import { useAuth } from '../context/AuthContext';
 
 const ResumeImprovements = () => {
@@ -127,7 +127,7 @@ const ResumeImprovements = () => {
     
     try {
       // Reuse ATS analysis logic to base suggestions upon
-      const response = await axios.post('/api/ats/analyze', { jobDescription });
+      const response = await api.post('/api/ats/analyze', { jobDescription });
       const analysisData = analyzeResumeHeuristics(response.data);
       setSuggestions(analysisData);
     } catch (err) {
