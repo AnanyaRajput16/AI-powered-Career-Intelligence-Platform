@@ -26,11 +26,23 @@ const AtsAnalyzer = () => {
     setError('');
     
     try {
-      const response = await api.post('/api/ats/analyze', { jobDescription, module: 'ats' }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setResult(response.data);
-      if (refreshUser) await refreshUser();
+     const response = await api.post(
+       '/api/ats/analyze',
+       { jobDescription, module: 'ats' },
+       {
+         headers: { Authorization: `Bearer ${token}` }
+        }
+       );
+
+       setResult(response.data);
+
+       // Save latest ATS result for Learning Path
+       localStorage.setItem(
+         'latestAtsResult',
+          JSON.stringify(response.data)
+   );
+
+if (refreshUser) await refreshUser();
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Error analyzing resume against job description.');
@@ -262,3 +274,4 @@ const AtsAnalyzer = () => {
 };
 
 export default AtsAnalyzer;
+
