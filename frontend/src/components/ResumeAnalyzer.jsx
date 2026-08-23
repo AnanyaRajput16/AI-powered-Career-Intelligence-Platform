@@ -155,7 +155,7 @@ const ResumeAnalyzer = () => {
   const handleDownload = async () => {
     try {
       setMessage('Fetching file...');
-      const response = await axios.get('/api/users/resume/download');
+      const response = await axios.get(`${API_URL}/api/users/resume/download`);
       const { fileName, fileData } = response.data;
       downloadBase64File(fileData, fileName);
       setMessage('');
@@ -174,7 +174,7 @@ const ResumeAnalyzer = () => {
 
     try {
       setMessage('Fetching file for view...');
-      const response = await axios.get('/api/users/resume/download');
+      const response = await axios.get(`${API_URL}/api/users/resume/download`);
 
       const { fileData, fileType, fileName } = response.data;
 
