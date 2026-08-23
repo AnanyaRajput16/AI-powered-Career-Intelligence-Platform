@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           
           // Fetch full profile from server to ensure fresh data
-          const response = await axios.get('/api/users/profile');
+          const response = await axios.get(`${API_URL}/api/users/profile`);
           const fullUser = response.data;
           
           localStorage.setItem('user', JSON.stringify(fullUser));
