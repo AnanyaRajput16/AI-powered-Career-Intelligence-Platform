@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -51,7 +53,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setError(null);
     try {
-      const response = await axios.post('/api/users/login', { email, password });
+      const response = await axios.post(`${API_URL}/api/users/login`, { email, password });
       
       const { token: receivedToken } = response.data;
       
@@ -60,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${receivedToken}`;
       
       // Fetch the full authenticated user profile immediately
-      const profileRes = await axios.get('/api/users/profile');
+      const profileRes = await axios.get(`${API_URL}/api/users/profile`);
       const fullUser = profileRes.data;
       
       localStorage.setItem('user', JSON.stringify(fullUser));
@@ -78,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     setError(null);
     try {
-      const response = await axios.post('/api/users/register', { name, email, password });
+      const response = await axios.post(`${API_URL}/api/users/register`, { name, email, password });
       
       return { success: true, data: response.data };
     } catch (err) {
@@ -92,7 +94,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     setError(null);
     try {
-      const response = await axios.put('/api/users/profile', profileData);
+      const response = await axios.put(`${API_URL}/api/users/profile`, profileData);
       const updatedUser = response.data;
       
       setUser(updatedUser);
